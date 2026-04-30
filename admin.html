@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>管理后台 | 家族传承风险诊断</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <nav class="nav">
+    <a class="nav-brand" href="./">
+      <div class="nav-gem">◆</div>
+      <div>
+        <div class="nav-name">管理后台</div>
+      </div>
+    </a>
+    <div class="nav-right">
+      <span class="nav-tag" id="admin-env-tag">Firestore</span>
+      <div class="nav-step-pill" id="admin-user-pill" style="display:none"></div>
+    </div>
+  </nav>
+
+  <div class="admin-wrap">
+    <div class="admin-card" id="view-login">
+      <div class="admin-title">管理员登录</div>
+      <div class="admin-sub">使用 Firebase Authentication（邮箱/密码）登录后才能查看提交数据。</div>
+
+      <div class="admin-form">
+        <label class="admin-label">邮箱</label>
+        <input class="admin-input" id="login-email" type="email" placeholder="admin@yourdomain.com" autocomplete="username" />
+
+        <label class="admin-label">密码</label>
+        <input class="admin-input" id="login-password" type="password" placeholder="请输入密码" autocomplete="current-password" />
+
+        <button class="cta-primary admin-btn" id="btn-login">
+          登录
+          <div class="cta-arrow">→</div>
+        </button>
+        <div class="admin-hint" id="login-hint"></div>
+      </div>
+    </div>
+
+    <div class="admin-card" id="view-dashboard" style="display:none">
+      <div class="admin-head">
+        <div>
+          <div class="admin-title">提交数据</div>
+          <div class="admin-sub">集合：<code>submissions</code>。默认读取最近 50 条，可按邮箱精确查询。</div>
+        </div>
+        <div class="admin-actions">
+          <button class="admin-ghost" id="btn-refresh">刷新</button>
+          <button class="admin-ghost" id="btn-export">导出 CSV</button>
+          <button class="admin-ghost" id="btn-logout">退出</button>
+        </div>
+      </div>
+
+      <div class="admin-filters">
+        <div class="admin-filter">
+          <label class="admin-label">邮箱精确查询（可留空）</label>
+          <input class="admin-input" id="filter-email" type="email" placeholder="example@office.com" />
+        </div>
+        <div class="admin-filter admin-filter-compact">
+          <label class="admin-label">数量</label>
+          <select class="admin-input" id="filter-limit">
+            <option value="20">20</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+        <div class="admin-filter admin-filter-compact">
+          <label class="admin-label">&nbsp;</label>
+          <button class="admin-primary" id="btn-search">查询</button>
+        </div>
+      </div>
+
+      <div class="admin-status" id="admin-status"></div>
+
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>时间</th>
+              <th>姓名</th>
+              <th>邮箱</th>
+              <th>画像</th>
+              <th>评级</th>
+              <th>分数</th>
+              <th>状态</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-modal" id="modal" style="display:none">
+    <div class="admin-modal-backdrop" id="modal-backdrop"></div>
+    <div class="admin-modal-card">
+      <div class="admin-modal-head">
+        <div class="admin-modal-title" id="modal-title">详情</div>
+        <button class="admin-x" id="modal-close">×</button>
+      </div>
+      <pre class="admin-json" id="modal-json"></pre>
+    </div>
+  </div>
+
+  <!-- Firebase (compat) -->
+  <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.4/firebase-app-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.4/firebase-auth-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.4/firebase-firestore-compat.js"></script>
+
+  <!-- 与 index.html 一致的配置 -->
+  <script>
+    window.__FIREBASE_CONFIG__ = {
+      apiKey: "AIzaSyBY7xrNs8STAWlN6XBMjCNfc_b76x2sHlI",
+      authDomain: "family-risk-diagnostic.firebaseapp.com",
+      projectId: "family-risk-diagnostic",
+      storageBucket: "family-risk-diagnostic.firebasestorage.app",
+      messagingSenderId: "297151953512",
+      appId: "1:297151953512:web:25468788f8590adc0d99dd",
+      measurementId: "G-VKS98ZZT8G"
+    };
+  </script>
+
+  <script src="admin.js"></script>
+</body>
+</html>
+
