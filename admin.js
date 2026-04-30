@@ -262,8 +262,21 @@ function boot() {
   try {
     api = ensureFirebase();
     api.auth.onAuthStateChanged((user) => {
-      if (user) showDashboard(user);
-      else showLogin();
+      // 重要：问卷页会创建匿名用户；后台必须强制使用邮箱/密码登录（非匿名）
+      if (user && !user.isAnonymous && user.email) {
+        showDashboard(user);
+        return;
+      }
+
+      // 如果检测到匿名用户，先提示并引导管理员登录
+      if (user && user.isAnonymous) {
+        try { api.auth.signOut(); } catch (_) {}
+        showLogin();
+        setHint('检测到匿名登录（来自问卷页面）。后台需要管理员邮箱/密码登录，请先在 Firebase 启用 Email/Password 并创建管理员用户。', 'error');
+        return;
+      }
+
+      showLogin();
     });
   } catch (e) {
     setHint('初始化失败：' + (e?.message || String(e)), 'error');
@@ -271,4 +284,3 @@ function boot() {
 }
 
 boot();
-
