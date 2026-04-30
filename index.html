@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>家族传承风险诊断 | Family Heritage Risk Assessment</title>
+  <meta name="description" content="专业家族办公室级别的传承风险诊断工具。5道路由+25道核心问题，七大风险维度与行为心智模块，六大压力情景，约10分钟完成完整评估。">
+  <meta property="og:title" content="家族传承风险诊断">
+  <meta property="og:description" content="了解您家族传承的真实风险。专业、量化、保密。">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◆</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ═══════════════════ GLOBAL NAV ═══════════════════ -->
+<nav class="nav">
+  <a class="nav-brand" href="#" onclick="document.getElementById('btn-restart')?.click();return false">
+    <div class="nav-gem">◆</div>
+    <div>
+      <div class="nav-name">家族传承风险诊断</div>
+    </div>
+  </a>
+  <div class="nav-right">
+    <span class="nav-tag">免费版</span>
+    <div class="nav-step-pill" id="nav-step-pill" style="display:none"></div>
+  </div>
+</nav>
+
+<!-- ═══════════════════ PROGRESS STRIP ═══════════════════ -->
+<div class="progress-strip" id="progress-strip" style="display:none">
+  <div class="progress-strip-fill" id="progress-strip-fill" style="width:0%"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     VIEW 1: LANDING
+════════════════════════════════════════════════════════ -->
+<div class="view" id="view-landing">
+
+  <section class="land-hero">
+    <div class="land-grid"></div>
+    <div class="land-glow"></div>
+
+    <div class="land-eyebrow">
+      <div class="land-gem-dot"></div>
+      华人家族传承风险研究框架 · 免费诊断工具
+    </div>
+
+    <h1 class="land-h1">
+      了解您家族<br>
+      <em>传承的真实风险</em>
+    </h1>
+
+    <p class="land-sub">
+      专业家族办公室级别的量化诊断工具。覆盖治理、传承、资产、合规、人才、关系、外部七大风险维度，结果秒出，数据留在您的设备上。
+    </p>
+
+    <div class="land-stats">
+      <div class="land-stat">
+        <div class="land-stat-num">25</div>
+        <div class="land-stat-lbl">核心问题</div>
+      </div>
+      <div class="land-stat">
+        <div class="land-stat-num">8</div>
+        <div class="land-stat-lbl">评估模块</div>
+      </div>
+      <div class="land-stat">
+        <div class="land-stat-num">6</div>
+        <div class="land-stat-lbl">压力情景</div>
+      </div>
+      <div class="land-stat">
+        <div class="land-stat-num">~10</div>
+        <div class="land-stat-lbl">分钟完成</div>
+      </div>
+    </div>
+
+    <button class="cta-primary" id="btn-start">
+      开始免费诊断
+      <div class="cta-arrow">→</div>
+    </button>
+
+    <div class="land-features">
+      <div class="feat-card">
+        <div class="feat-icon">🏛️</div>
+        <div class="feat-title">七大风险量化评级</div>
+        <div class="feat-desc">传承、治理、资产、合规、人才、声誉、外部 — 每个维度精确评分，优先级排序</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔴</div>
+        <div class="feat-title">红线警报系统</div>
+        <div class="feat-desc">9项关键红线规则检测，识别您家族最急迫的结构性漏洞并发出即时预警</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">⚡</div>
+        <div class="feat-title">六大压力情景测试</div>
+        <div class="feat-desc">创始人失能、婚变冲击、现金流骤降等情景下，您的家族韧性如何？</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">💎</div>
+        <div class="feat-title">六维资本健康度</div>
+        <div class="feat-desc">金融、人才、智识、社会、文化、治理六维资本雷达图，一眼看清家族综合实力</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🗺️</div>
+        <div class="feat-title">专属服务建议路线图</div>
+        <div class="feat-desc">基于您的诊断结果，按优先级输出即时、中期、长期三阶段专业服务建议</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔒</div>
+        <div class="feat-title">数据完全本地化</div>
+        <div class="feat-desc">所有计算在您的浏览器内完成，答案不上传任何服务器，绝对保密</div>
+      </div>
+    </div>
+
+    <p class="land-disclaimer">
+      本工具基于华人家族传承研究框架，由家族办公室专家设计，仅供参考与自评用途，不构成法律、税务或投资建议。如需专业咨询，请联系持牌机构。
+    </p>
+  </section>
+
+</div><!-- /view-landing -->
+
+
+<!-- ═══════════════════════════════════════════════════════
+     VIEW 2: AUTOMATED PROFILE (RQ1-RQ5)
+════════════════════════════════════════════════════════ -->
+<div class="view" id="view-profile">
+  <div class="form-wrap">
+
+    <div class="view-headline">
+      <h2>首先，请完善家族基础背景</h2>
+      <p>系统将根据以下 5 个关键维度自动诊断您的家族画像与所处阶段</p>
+    </div>
+
+    <div class="routing-questions" id="routing-container">
+      <!-- Routing questions injected by app.js -->
+    </div>
+
+    <div class="nf-buttons" style="margin-top:32px;justify-content:flex-end;display:flex">
+      <button class="btn-next" id="btn-profile-next" disabled style="padding:12px 32px">
+        <span class="next-label">开始风险评估</span>
+        <span class="next-arrow">→</span>
+      </button>
+    </div>
+
+  </div>
+</div><!-- /view-profile -->
+
+
+<!-- ═══════════════════════════════════════════════════════
+     VIEW 3: QUESTIONNAIRE
+════════════════════════════════════════════════════════ -->
+<div class="view" id="view-questionnaire">
+  <div class="q-wrap">
+
+    <div class="module-header">
+      <div class="module-tag">
+        <div class="module-num" id="q-mod-tag">01 · 治理</div>
+      </div>
+      <h2 id="q-mod-title">治理模块</h2>
+      <p id="q-mod-desc">治理结构与规则体系</p>
+    </div>
+
+    <div class="question-list" id="q-module-container">
+      <!-- Questions injected by app.js -->
+    </div>
+
+  </div>
+
+  <!-- Fixed bottom nav -->
+  <div class="nav-footer">
+    <div class="nf-progress">
+      <div class="nf-prog-bar">
+        <div class="nf-prog-fill" id="nf-prog-fill" style="width:0%"></div>
+      </div>
+      <div class="nf-prog-text" id="nf-prog-text">0 / 25 题已完成</div>
+    </div>
+    <div class="nf-buttons">
+      <button class="btn-prev" id="btn-q-prev" style="display:none">← 上一模块</button>
+      <button class="btn-next" id="btn-q-next" disabled>
+        <span class="next-label">下一模块</span>
+        <span class="next-arrow">→</span>
+      </button>
+    </div>
+  </div>
+
+</div><!-- /view-questionnaire -->
+
+
+<!-- ═══════════════════════════════════════════════════════
+     VIEW 3.5: UNLOCK RESULTS (LEAD FORM)
+════════════════════════════════════════════════════════ -->
+<div class="view" id="view-lead">
+  <div class="form-wrap" style="max-width:540px">
+    
+    <div class="view-headline" style="text-align:center;margin-bottom:32px">
+      <div style="font-size:48px;margin-bottom:16px">📈</div>
+      <h2 style="font-size:28px;letter-spacing:-1px">您的家族传承风险报告已就绪</h2>
+      <p>输入联络信息，系统将立即为您解锁全文并发送 PDF 副本至您的私人邮箱。</p>
+    </div>
+
+    <div class="lead-form-box" style="padding:32px;background:rgba(255,255,255,0.03);border-color:rgba(201,168,76,0.3)">
+      <div class="form-group" style="margin-bottom:20px">
+        <label style="color:var(--gold);font-size:12px">真实姓名 / 称呼</label>
+        <div class="input-wrap">
+          <input type="text" id="lead-name" placeholder="请输入您的姓名" style="background:var(--bg);border-color:var(--border)">
+        </div>
+      </div>
+      
+      <div class="form-group" style="margin-bottom:20px">
+        <label style="color:var(--gold);font-size:12px">私人电子邮箱</label>
+        <div class="input-wrap">
+          <input type="email" id="lead-email" placeholder="example@office.com" style="background:var(--bg);border-color:var(--border)">
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:24px">
+        <label style="color:var(--gold);font-size:12px">联系电话（可选）</label>
+        <div class="input-wrap">
+          <input type="tel" id="lead-phone" placeholder="接收深度咨询邀约" style="background:var(--bg);border-color:var(--border)">
+        </div>
+      </div>
+
+      <div class="privacy-note" style="margin-bottom:24px;border-top:1px solid var(--border);padding-top:16px">
+        <input type="checkbox" id="privacy-check" checked>
+        <label for="privacy-check" style="font-size:10px;color:var(--txt-3)">
+          我理解并同意：我的诊断数据将受到严格保密，此信息仅用于发送报告。
+        </label>
+      </div>
+
+      <button class="cta-primary" id="btn-lead-submit" style="width:100%;height:54px;font-size:16px;justify-content:center">
+        <span>立即解锁诊断结论</span>
+        <div class="cta-arrow" style="background:rgba(0,0,0,0.1)">→</div>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     VIEW 4: LOADING
+════════════════════════════════════════════════════════ -->
+<div class="view" id="view-loading">
+  <div class="loading-orb"></div>
+  <div class="loading-title">正在分析您的家族风险画像…</div>
+  <div class="loading-steps" id="loading-steps">
+    <!-- Steps injected by app.js -->
+  </div>
+</div><!-- /view-loading -->
+
+
+<!-- ═══════════════════════════════════════════════════════
+     VIEW 5: RESULTS
+════════════════════════════════════════════════════════ -->
+<div class="view" id="view-results">
+  <div class="results-wrap">
+
+    <!-- ① Hero / Summary Card -->
+    <div class="res-hero">
+      <div class="res-hero-bg"></div>
+      <div class="res-badge-wrap">
+        <div class="res-badge" id="res-badge">?</div>
+      </div>
+      <div class="res-level" id="res-level">诊断结果</div>
+      <div class="res-score-line">综合健康度评分（满分 100）</div>
+      <div class="res-score-num" id="res-score-num">—</div>
+      <div class="res-score-sub">分值越高代表家族传承体系越健全</div>
+      <div class="res-kpi-row">
+        <div class="res-kpi">
+          <div class="res-kpi-val crit" id="kpi-redlines">—</div>
+          <div class="res-kpi-lbl">红线触发</div>
+        </div>
+        <div class="res-kpi">
+          <div class="res-kpi-val high" id="kpi-ix">—</div>
+          <div class="res-kpi-lbl">复合风险</div>
+        </div>
+        <div class="res-kpi">
+          <div class="res-kpi-val" id="kpi-toprisk">—</div>
+          <div class="res-kpi-lbl">最高风险分</div>
+        </div>
+      </div>
+      <div class="res-meta" id="res-meta"></div>
+    </div>
+
+    <!-- ② Risk Heatmap -->
+    <div class="r-section">
+      <div class="r-section-title">
+        <span class="title-icon">📊</span>
+        七大风险优先级排序
+        <span class="title-badge" id="heatmap-count"></span>
+      </div>
+      <div class="heatmap" id="heatmap-body"></div>
+    </div>
+
+    <!-- ③ Redline Alerts -->
+    <div class="r-section" id="redline-section" style="display:none">
+      <div class="r-section-title">
+        <span class="title-icon">🚨</span>
+        红线警报 — 需立即关注
+        <span class="redline-alert" id="rl-badge"></span>
+      </div>
+      <div class="redline-list" id="redline-list"></div>
+    </div>
+
+    <!-- ④ Risk Interactions -->
+    <div class="r-section" id="ix-section" style="display:none">
+      <div class="r-section-title">
+        <span class="title-icon">⚡</span>
+        复合风险交互效应
+        <span class="title-badge" id="ix-badge"></span>
+      </div>
+      <div class="ix-list" id="ix-list"></div>
+    </div>
+
+    <!-- ⑤ Six Capitals -->
+    <div class="r-section">
+      <div class="r-section-title">
+        <span class="title-icon">💎</span>
+        六维资本健康度分析
+        <span class="title-badge">评分范围 0–4</span>
+      </div>
+      <div class="capitals-layout">
+        <div class="capitals-list" id="capitals-list"></div>
+        <div class="chart-container">
+          <canvas id="radar-canvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑥ Stress Tests -->
+    <div class="r-section">
+      <div class="r-section-title">
+        <span class="title-icon">⚠️</span>
+        六大压力情景 — 脆弱性测试
+        <span class="title-badge">已按脆弱度排序</span>
+      </div>
+      <div class="scenario-grid" id="scenario-grid"></div>
+    </div>
+
+    <!-- ⑦ Services -->
+    <div class="r-section">
+      <div class="r-section-title">
+        <span class="title-icon">🗺️</span>
+        优先服务建议路线图
+        <span class="title-badge">TOP 10</span>
+      </div>
+      <div class="services-layout" id="services-body"></div>
+    </div>
+
+    <!-- ⑧ Upgrade CTA -->
+    <div class="upgrade-section">
+      <div class="upgrade-glow"></div>
+      <div class="upgrade-label">✦ 专业版</div>
+      <h3 class="upgrade-h">想要更深度的诊断与落地方案？</h3>
+      <p class="upgrade-sub">
+        免费版已为您呈现核心风险排序与建议方向。<br>
+        专业版提供更完整的家族画像分析、改善路线图与顾问解读服务。
+      </p>
+      <div class="upgrade-perks">
+        <div class="perk">
+          <div class="perk-icon">📚</div>
+          <div class="perk-text">
+            <strong>标杆案例库匹配</strong>
+            与12组真实华人家族案例对标，找到最近似的传承路径参考
+          </div>
+        </div>
+        <div class="perk">
+          <div class="perk-icon">🗓️</div>
+          <div class="perk-text">
+            <strong>3年改善路线图</strong>
+            逐年行动计划，每项建议配具体推进步骤与预期效果
+          </div>
+        </div>
+        <div class="perk">
+          <div class="perk-icon">👤</div>
+          <div class="perk-text">
+            <strong>顾问一对一解读</strong>
+            由持牌家族办公室顾问进行报告解读与深度咨询
+          </div>
+        </div>
+      </div>
+      <button class="cta-upgrade" onclick="alert('专业版即将上线，欢迎留下您的联系方式获取优先通知。')">
+        了解专业版 →
+      </button>
+    </div>
+
+    <!-- Footer nav -->
+    <div class="res-nav">
+      <button class="btn-restart" id="btn-restart">← 重新诊断</button>
+    </div>
+
+  </div>
+</div><!-- /view-results -->
+
+
+<!-- ═══════════════════ SCRIPTS ═══════════════════ -->
+<script src="engine.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
+
