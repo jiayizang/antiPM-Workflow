@@ -398,6 +398,28 @@
 
 
 <!-- ═══════════════════ SCRIPTS ═══════════════════ -->
+<!-- Firebase (用于线上入库；如不需要可移除) -->
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.4/firebase-app-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.4/firebase-auth-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.4/firebase-firestore-compat.js"></script>
+
+<!--
+  重要：
+  1) 请在 Firebase Console -> Project settings -> General -> Your apps -> Web app 中复制 firebaseConfig
+  2) 将下面的占位对象替换为你的真实 config（这不是密钥，不需要保密，但不要随意改字段名）
+-->
+<script>
+  window.__FIREBASE_CONFIG__ = {
+    apiKey: "AIzaSyBY7xrNs8STAWlN6XBMjCNfc_b76x2sHlI",
+    authDomain: "family-risk-diagnostic.firebaseapp.com",
+    projectId: "family-risk-diagnostic",
+    storageBucket: "family-risk-diagnostic.firebasestorage.app",
+    messagingSenderId: "297151953512",
+    appId: "1:297151953512:web:25468788f8590adc0d99dd",
+    measurementId: "G-VKS98ZZT8G"
+  };
+</script>
+
 <script src="engine.js"></script>
 <script src="app.js"></script>
 

@@ -13,7 +13,12 @@ const state = {
   moduleIndex: 0,          // 0-6
   result: null,
   lead: null,              // { name, phone, email }
-  history: []              // Local history for robustness
+  history: [],             // Local history for robustness
+
+  // 云端入库（Firestore）：不影响主流程，失败也不会阻断报告展示
+  cloudDocId: null,
+  cloudSyncPromise: null,
+  clientSubmissionId: null,
 };
 
 const TOTAL_Q = 25; // 19主模块 + 6行为模块
@@ -234,46 +239,145 @@ document.getElementById('btn-lead-submit').addEventListener('click', () => {
 
   state.lead = { name, phone, email };
   saveLeadLocally(state.lead, state.answers); // 保底方案
-  
-  // 自动化上线：将数据推送到您的采集终端
-  syncLeadToCloud(state.lead, state.answers);
+
+  // 云端入库（先写一份 draft，避免后续计算/断网导致丢单）
+  state.cloudSyncPromise = syncLeadToCloudDraft(state.lead, state.answers);
   
   startDiagnosis();
 });
 
 /**
- * 腾讯云版自动化采集：将数据存入 TCB 云数据库
+ * Google Firebase / Firestore 入库（兼容 GitHub Pages 纯静态站）
+ * - 不会阻断用户看报告（失败只会 console.warn）
+ * - 建议在 Firebase Console 启用“匿名登录”，并设置 Firestore Rules 只允许 create
  */
-async function syncLeadToCloud(lead, answers) {
-  // 1. 初始化云开发 (请将下面的 env 换成您在腾讯云申请的环境 ID)
-  // 您可以在控制台搜索“云开发 CloudBase”获取
-  const TCB_ENV_ID = "您的-TCB-环境ID"; 
-  
+let __firebaseInitPromise = null;
+
+function __safeUUID() {
+  try { return crypto.randomUUID(); } catch (_) {}
+  return 'sub_' + Math.random().toString(16).slice(2) + '_' + Date.now();
+}
+
+function __hasFirebaseConfig() {
+  const cfg = window.__FIREBASE_CONFIG__ || {};
+  const isPlaceholder = (v) => !v || String(v).toUpperCase().includes('PASTE_') || String(v).toUpperCase().includes('PASTE YOUR');
+  if (!cfg) return false;
+  if (isPlaceholder(cfg.apiKey) || isPlaceholder(cfg.projectId)) return false;
+  return !!(cfg.apiKey && cfg.projectId && window.firebase);
+}
+
+async function __getFirestore() {
+  if (!__hasFirebaseConfig()) {
+    throw new Error('Firebase 未配置：请在 index.html 填写 window.__FIREBASE_CONFIG__。');
+  }
+  if (__firebaseInitPromise) return __firebaseInitPromise;
+
+  __firebaseInitPromise = (async () => {
+    const cfg = window.__FIREBASE_CONFIG__;
+    if (!firebase.apps || !firebase.apps.length) {
+      firebase.initializeApp(cfg);
+    }
+
+    // 尝试匿名登录：若控制台未启用匿名登录，这里会报错；但在 test rules 下仍可能写入。
+    try {
+      const auth = firebase.auth();
+      if (!auth.currentUser) {
+        await auth.signInAnonymously();
+      }
+    } catch (e) {
+      console.warn('Firebase 匿名登录失败（可先用 Firestore test mode 验证写入是否通）:', e);
+    }
+
+    if (!firebase.firestore) {
+      throw new Error('Firestore SDK 未加载：请确认已在 index.html 引入 firebase-firestore-compat.js');
+    }
+    return firebase.firestore();
+  })();
+
+  return __firebaseInitPromise;
+}
+
+function __pickResultForStorage(result) {
+  if (!result) return null;
+  return {
+    overallScore: result.overallScore,
+    overallRiskLevel: result.overallRiskLevel,
+    meta: result.meta,
+    riskScores: result.riskScores,
+    redlines: result.redlines,
+    interactions: result.interactions,
+    sixCapitals: result.sixCapitals,
+    stressTests: result.stressTests,
+    services: result.services,
+    behavioral: result.behavioral || null,
+  };
+}
+
+async function syncLeadToCloudDraft(lead, answers) {
+  if (!__hasFirebaseConfig()) {
+    console.info('Firebase 未配置，跳过云端入库（仅本地存底）。');
+    return null;
+  }
+
   try {
-    const app = tcb.init({ env: TCB_ENV_ID });
-    const auth = app.auth();
-    // 匿名登录以实现免登提交
-    await auth.anonymousAuthProvider().signIn();
-    
-    const db = app.database();
-    
-    // 2. 存入 'leads' 集合
-    await db.collection("leads").add({
-      timestamp: new Date().toISOString(),
-      lead_info: lead,
-      diagnostic_summary: {
-        score: state.result.overallScore,
-        level: state.result.overallRiskLevel,
-        persona: state.persona,
-        stage: state.stage
+    if (!state.clientSubmissionId) state.clientSubmissionId = __safeUUID();
+    const db = await __getFirestore();
+    let authUid = null;
+    try { authUid = firebase.auth()?.currentUser?.uid || null; } catch (_) {}
+
+    const ref = await db.collection('submissions').add({
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      submittedAtISO: new Date().toISOString(),
+      status: 'draft',
+
+      clientSubmissionId: state.clientSubmissionId,
+      authUid,
+      lead,
+      routingAnswers: state.routingAnswers,
+      answers,
+      persona: state.persona,
+      stage: state.stage,
+
+      // 便于排查线上问题（不影响业务）
+      clientMeta: {
+        url: location.href,
+        userAgent: navigator.userAgent,
+        tz: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
+        lang: navigator.language || null,
       },
-      raw_answers: answers
+
+      schemaVersion: 'web-v4.0-20260430',
     });
-    
-    console.log("💎 诊断数据已安全存入腾讯云数据库");
+
+    state.cloudDocId = ref.id;
+    console.log('✅ Firestore 已写入 draft:', ref.id);
+    return ref.id;
   } catch (e) {
-    console.warn("腾讯云同步不可用，请确认环境ID是否正确:", e);
-    // 即使出错，也会因为使用了 Web3Forms 做备选，确保数据必达
+    console.warn('Firestore draft 写入失败（不影响报告展示）:', e);
+    return null;
+  }
+}
+
+async function syncLeadToCloudFinalize(result) {
+  if (!__hasFirebaseConfig()) return;
+
+  try {
+    // 等待 draft 写入完成，拿到 docId
+    if (!state.cloudDocId && state.cloudSyncPromise) {
+      state.cloudDocId = await state.cloudSyncPromise;
+    }
+    if (!state.cloudDocId) return;
+
+    const db = await __getFirestore();
+    await db.collection('submissions').doc(state.cloudDocId).set({
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      status: 'final',
+      result: __pickResultForStorage(result),
+    }, { merge: true });
+
+    console.log('✅ Firestore 已写入 final result:', state.cloudDocId);
+  } catch (e) {
+    console.warn('Firestore final 写入失败（不影响报告展示）:', e);
   }
 }
 
@@ -321,6 +425,9 @@ async function startDiagnosis() {
 
   // Run computation
   state.result = runFullDiagnostic(state.answers, state.routingAnswers);
+
+  // 计算完成后补写 final 结果（draft 在 lead-submit 时已写）
+  await syncLeadToCloudFinalize(state.result);
 
   await sleep(200);
   renderResults(state.result);
