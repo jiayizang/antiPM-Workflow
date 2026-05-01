@@ -313,6 +313,39 @@ function __pickResultForStorage(result) {
   };
 }
 
+function buildPaidFreeSnapshot() {
+  if (!state.result) return null;
+  return {
+    submissionId: state.cloudDocId || state.clientSubmissionId || '',
+    clientSubmissionId: state.clientSubmissionId || '',
+    cloudDocId: state.cloudDocId || '',
+    email: state.lead?.email || '',
+    lead: state.lead || null,
+    persona: state.persona,
+    stage: state.stage,
+    routingAnswers: state.routingAnswers,
+    answers: state.answers,
+    result: state.result,
+  };
+}
+
+function gotoPaidVersion() {
+  const snapshot = buildPaidFreeSnapshot();
+  if (!snapshot) {
+    alert('请先完成免费版诊断，再进入专业版。');
+    return;
+  }
+
+  try {
+    sessionStorage.setItem('paid:lastFreeSnapshot', JSON.stringify(snapshot));
+  } catch (e) {
+    console.warn('sessionStorage 写入失败，收费版将仅依赖 URL 参数载入快照：', e);
+  }
+
+  const target = `paid/paid.html?submissionId=${encodeURIComponent(snapshot.submissionId || '')}`;
+  window.location.href = target;
+}
+
 async function syncLeadToCloudDraft(lead, answers) {
   if (!__hasFirebaseConfig()) {
     console.info('Firebase 未配置，跳过云端入库（仅本地存底）。');
@@ -428,6 +461,12 @@ async function startDiagnosis() {
 
   // 计算完成后补写 final 结果（draft 在 lead-submit 时已写）
   await syncLeadToCloudFinalize(state.result);
+
+  try {
+    sessionStorage.setItem('paid:lastFreeSnapshot', JSON.stringify(buildPaidFreeSnapshot()));
+  } catch (e) {
+    console.warn('免费版结果快照写入 sessionStorage 失败：', e);
+  }
 
   await sleep(200);
   renderResults(state.result);
@@ -687,6 +726,10 @@ document.getElementById('btn-restart').addEventListener('click', () => {
   state.result = null;
   showView('landing');
   updateStrip(0);
+});
+
+document.getElementById('btn-upgrade-paid').addEventListener('click', () => {
+  gotoPaidVersion();
 });
 
 // ═══════════════════ INIT ═══════════════════
