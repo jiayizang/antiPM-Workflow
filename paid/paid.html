@@ -28,11 +28,23 @@
       </p>
     </section>
 
+    <section class="paid-card" id="entry-section">
+      <h2 class="paid-card-title">确认进入专业版</h2>
+      <p class="paid-card-sub" id="entry-copy">
+        我们会继承免费版的家族画像、发展阶段和基础风险结果，再追加 24 道关于保险、文件、股权、跨境、顾问和执行机制的问题。
+      </p>
+      <div class="paid-actions">
+        <button class="paid-btn" id="btn-begin-paid">开始专业版问卷</button>
+        <button class="paid-outline" id="btn-back-free" type="button">返回免费版</button>
+      </div>
+      <div class="paid-state" id="entry-state">等待载入免费版快照。</div>
+    </section>
+
     <section class="paid-grid">
-      <div class="paid-card">
-        <h2 class="paid-card-title">载入免费版结果</h2>
+      <div class="paid-card paid-hidden" id="debug-panel">
+        <h2 class="paid-card-title">内部调试入口</h2>
         <p class="paid-card-sub">
-          第一版默认支持三种方式：管理员调试读取 Firestore、粘贴免费版 JSON 快照、或用测试样例快速演示。
+          这一块仅用于内部调试：管理员读取 Firestore、粘贴免费版 JSON 快照、或用测试样例快速演示。
         </p>
         <div class="paid-form-grid">
           <div>

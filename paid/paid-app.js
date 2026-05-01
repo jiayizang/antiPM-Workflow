@@ -14,6 +14,12 @@ const paidState = {
 };
 
 const paidEls = {
+  entrySection: document.getElementById("entry-section"),
+  entryCopy: document.getElementById("entry-copy"),
+  entryState: document.getElementById("entry-state"),
+  btnBeginPaid: document.getElementById("btn-begin-paid"),
+  btnBackFree: document.getElementById("btn-back-free"),
+  debugPanel: document.getElementById("debug-panel"),
   submissionId: document.getElementById("submission-id"),
   adminEmail: document.getElementById("admin-email"),
   adminPassword: document.getElementById("admin-password"),
@@ -53,6 +59,8 @@ const paidEls = {
   },
 };
 
+const paidDebugMode = q("debug") === "1";
+
 function setLoaderState(text, status = "") {
   paidEls.loaderState.textContent = text;
   paidEls.loaderState.className = `paid-state${status ? ` ${status}` : ""}`;
@@ -60,6 +68,11 @@ function setLoaderState(text, status = "") {
 
 function setSnapshotState(text) {
   paidEls.snapshotState.textContent = text;
+}
+
+function setEntryState(text, status = "") {
+  paidEls.entryState.textContent = text;
+  paidEls.entryState.className = `paid-state${status ? ` ${status}` : ""}`;
 }
 
 function setReportState(text, status = "") {
@@ -226,9 +239,12 @@ function applyFreeSnapshot(snapshot, message) {
   paidState.paidResult = null;
   sessionStorage.setItem("paid:lastFreeSnapshot", JSON.stringify(snapshot));
   renderFreeSnapshot();
-  renderQuestionnaire();
+  paidEls.questionnaire.classList.add("paid-hidden");
   paidEls.report.classList.remove("active");
   setLoaderState(message, "ok");
+  setEntryState("免费版结果已就绪，确认后即可进入专业版问卷。", "ok");
+  paidEls.entryCopy.textContent =
+    `我们已继承免费版结果：${snapshot.personaLabel || snapshot.persona || "家族画像未命名"} / ${snapshot.stageLabel || snapshot.lifecycleStage || "阶段未命名"}。接下来会追加 24 道“工具、文件、控制权、跨境与执行”问题。`;
 }
 
 function renderFreeSnapshot() {
@@ -288,6 +304,15 @@ function renderQuestionnaire() {
 
   wireQuestionEvents();
   updateProgress();
+}
+
+function enterQuestionnaire() {
+  if (!paidState.freeSnapshot) {
+    setEntryState("请先从免费版结果页进入，或由内部调试入口载入快照。", "error");
+    return;
+  }
+  renderQuestionnaire();
+  paidEls.questionnaire.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function wireQuestionEvents() {
@@ -499,12 +524,17 @@ function copyReportJson() {
 function generateReport() {
   if (!paidState.freeSnapshot) {
     setReportState("请先载入免费版结果。", "error");
+    alert("请先从免费版结果页进入专业版，或先载入免费版快照。");
     return;
   }
   if (!allAnswered()) {
-    setReportState("24 道收费版问题还没有全部完成。", "error");
+    const remaining = PAID_QUESTIONS.length - Object.keys(paidState.paidAnswers).length;
+    setReportState(`还有 ${remaining} 道题未完成。`, "error");
+    alert(`还有 ${remaining} 道题未完成，请先完成全部 24 题。`);
+    paidEls.questionnaire.scrollIntoView({ behavior: "smooth", block: "start" });
     return;
   }
+  setReportState("正在生成收费版报告…", "ok");
   paidState.paidResult = generatePaidDiagnosis(paidState.freeSnapshot, paidState.paidAnswers);
   renderReport();
   sessionStorage.setItem("paid:lastPaidResult", JSON.stringify(paidState.paidResult));
@@ -512,6 +542,8 @@ function generateReport() {
 }
 
 function bootFromQueryOrCache() {
+  paidEls.debugPanel.classList.toggle("paid-hidden", !paidDebugMode);
+
   const submissionId = q("submissionId");
   if (submissionId) {
     paidEls.submissionId.value = submissionId;
@@ -528,10 +560,18 @@ function bootFromQueryOrCache() {
   if (cached) {
     const snapshot = JSON.parse(cached);
     applyFreeSnapshot(snapshot, "已恢复上次免费版快照。");
+    return;
   }
+
+  setEntryState("当前没有检测到免费版结果。请先完成免费版诊断，再从结果页进入专业版。", "error");
+  setSnapshotState("未检测到快照");
 }
 
 function wirePaidEvents() {
+  paidEls.btnBeginPaid.addEventListener("click", enterQuestionnaire);
+  paidEls.btnBackFree.addEventListener("click", () => {
+    window.location.href = "../index.html";
+  });
   paidEls.btnLoginAdmin.addEventListener("click", () => adminLogin().catch((error) => {
     setLoaderState(`管理员登录失败：${error.message}`, "error");
   }));
