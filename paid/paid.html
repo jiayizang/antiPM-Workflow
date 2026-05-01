@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>收费版诊断</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="stylesheet" href="./paid-styles.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div>
+        <div class="brand-title">家族传承风险诊断</div>
+        <div class="brand-subtitle">收费版 · 财富安排可执行性诊断</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="paid-shell">
+    <section class="paid-hero">
+      <div class="paid-eyebrow">收费版原型 · 免费版结果继承</div>
+      <h1 class="paid-title">家族财富安排可执行性诊断报告</h1>
+      <p class="paid-sub">
+        免费版负责告诉您风险可能集中在哪里；收费版进一步回答，保险、遗嘱、股权、信托、海外资产、税务安排与顾问体系，
+        在离世、失能、婚姻变化、税务审查、股权交接或市场冲击下，是否真的能顺畅执行。
+      </p>
+    </section>
+
+    <section class="paid-grid">
+      <div class="paid-card">
+        <h2 class="paid-card-title">载入免费版结果</h2>
+        <p class="paid-card-sub">
+          第一版默认支持三种方式：管理员调试读取 Firestore、粘贴免费版 JSON 快照、或用测试样例快速演示。
+        </p>
+        <div class="paid-form-grid">
+          <div>
+            <label class="paid-label" for="submission-id">免费版 Submission ID</label>
+            <input class="paid-input" id="submission-id" placeholder="例如：dF1sh5C2RfYqLzmtzjR8" />
+          </div>
+          <div>
+            <label class="paid-label" for="admin-email">管理员邮箱（调试读取 Firestore 时使用）</label>
+            <input class="paid-input" id="admin-email" placeholder="you@example.com" />
+          </div>
+          <div>
+            <label class="paid-label" for="admin-password">管理员密码</label>
+            <input class="paid-input" id="admin-password" type="password" placeholder="请输入管理员密码" />
+          </div>
+        </div>
+        <div class="paid-actions">
+          <button class="paid-btn" id="btn-login-admin">管理员登录</button>
+          <button class="paid-ghost" id="btn-load-firestore">读取免费版结果</button>
+          <button class="paid-outline" id="btn-logout-admin">退出登录</button>
+        </div>
+        <div class="paid-state" id="loader-state">等待加载免费版快照。</div>
+
+        <div class="paid-debug-box">
+          <label class="paid-label" for="debug-json">或者直接粘贴免费版快照 / submissions 文档 JSON</label>
+          <textarea class="paid-textarea" id="debug-json" placeholder='{"submissionId":"...","result":{...}}'></textarea>
+          <div class="paid-actions">
+            <button class="paid-ghost" id="btn-load-json">使用粘贴 JSON</button>
+            <button class="paid-outline" id="btn-load-sample">加载演示样例</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="paid-card">
+        <h2 class="paid-card-title">免费版结果摘要</h2>
+        <p class="paid-card-sub">
+          收费版不会重新定义免费版结论，而是在此基础上追加“工具、文件、控制权、跨境与执行”层面的深度核查。
+        </p>
+        <div class="paid-free-summary">
+          <div class="paid-kpi">
+            <div class="paid-kpi-label">家族画像</div>
+            <div class="paid-kpi-value" id="sum-persona">未载入</div>
+          </div>
+          <div class="paid-kpi">
+            <div class="paid-kpi-label">发展阶段</div>
+            <div class="paid-kpi-value" id="sum-stage">未载入</div>
+          </div>
+          <div class="paid-kpi">
+            <div class="paid-kpi-label">免费版评级</div>
+            <div class="paid-kpi-value" id="sum-rating">未载入</div>
+          </div>
+          <div class="paid-kpi">
+            <div class="paid-kpi-label">免费版综合分</div>
+            <div class="paid-kpi-value" id="sum-overall-score">未载入</div>
+          </div>
+          <div class="paid-kpi">
+            <div class="paid-kpi-label">最高单项风险</div>
+            <div class="paid-kpi-value" id="sum-max-risk">未载入</div>
+          </div>
+          <div class="paid-kpi">
+            <div class="paid-kpi-label">快照状态</div>
+            <div class="paid-kpi-value" id="snapshot-state">等待快照</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="paid-modules paid-hidden" id="paid-questionnaire">
+      <div id="paid-modules-container"></div>
+      <div class="paid-footer-bar">
+        <div class="paid-progress" id="paid-progress-text">已完成 0 / 24 题</div>
+        <button class="paid-btn" id="btn-generate">生成收费版诊断报告</button>
+      </div>
+    </section>
+
+    <section class="paid-report" id="paid-report">
+      <div class="paid-report-actions">
+        <button class="paid-ghost" id="btn-print">打印 / 导出 PDF</button>
+        <button class="paid-ghost" id="btn-save-report">写入 paidReports</button>
+        <button class="paid-outline" id="btn-copy-json">复制结果 JSON</button>
+      </div>
+      <div class="paid-state" id="report-state">等待生成报告。</div>
+
+      <section class="paid-section" id="section-overview"></section>
+      <section class="paid-section" id="section-free"></section>
+      <section class="paid-section" id="section-tooling"></section>
+      <section class="paid-section" id="section-indices"></section>
+      <section class="paid-section" id="section-tool-risks"></section>
+      <section class="paid-section" id="section-event-risks"></section>
+      <section class="paid-section" id="section-blindspots"></section>
+      <section class="paid-section" id="section-cases"></section>
+      <section class="paid-section" id="section-services"></section>
+      <section class="paid-section" id="section-actions"></section>
+    </section>
+  </main>
+
+  <script>
+    window.__FIREBASE_CONFIG__ = {
+      apiKey: "AIzaSyBY7xrNs8STAWlN6XBMjCNfc_b76x2sHlI",
+      authDomain: "family-risk-diagnostic.firebaseapp.com",
+      projectId: "family-risk-diagnostic",
+      storageBucket: "family-risk-diagnostic.firebasestorage.app",
+      messagingSenderId: "297151953512",
+      appId: "1:297151953512:web:25468788f8590adc0d99dd",
+      measurementId: "G-VKS98ZZT8G"
+    };
+  </script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+  <script src="./paid-questions.js"></script>
+  <script src="./paid-service-map.js"></script>
+  <script src="./paid-report-blocks.js"></script>
+  <script src="./paid-engine.js"></script>
+  <script src="./paid-app.js"></script>
+</body>
+</html>
